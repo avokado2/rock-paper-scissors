@@ -1,0 +1,46 @@
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Registration Page </title>
+    <!--Made with love by Mutiullah Samim -->
+
+    <!--Custom styles-->
+    <link rel="stylesheet" type="text/css" href="registration.css">
+</head>
+<body>
+<h5><font color="red" th:text="${errorMessage}"></font></h5>
+<div class="col-md-4 col-md-offset-4" id="login">
+    <section id="inner-wrapper" class="login">
+        <article>
+            <form action="/registration" method="post">
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-user"> </i></span>
+                        <input type="text" class="form-control" placeholder="Name" name="login">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-key"> </i></span>
+                        <input type="password" class="form-control" placeholder="Password" name="password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-key"> </i></span>
+                        <input type="password" class="form-control" placeholder="Confirm Password" name="confirmPassword">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success btn-block">Submit</button>
+            </form>
+        </article>
+    </section></div>
+<div class="card-footer">
+    <div class="d-flex justify-content-center links">
+        Have an account?<a href="/login">Sign In</a>
+    </div>
+</div>
