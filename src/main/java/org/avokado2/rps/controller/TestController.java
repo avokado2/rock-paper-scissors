@@ -66,15 +66,7 @@ public class TestController {
         }
         return messages;
     }
-    @ResponseBody
-    @GetMapping("/game-play")
-    public HelloResponse gamePlay(@RequestParam(value = "choicePlayer1") GameChoice choicePlayer1,
-                                    @RequestParam(value = "choicePlayer2") GameChoice choicePlayer2,
-                              @RequestParam(value = "gameId") long gameId) {
-        gameManager.playRound(gameId, choicePlayer1, choicePlayer2);
-        String ret = String.format("Hello !");
-        return new HelloResponse(ret);
-    }
+
 
     @ResponseBody
     @GetMapping("/start-game")
@@ -98,6 +90,13 @@ public class TestController {
     @GetMapping("/cancel-game-request")
     public HelloResponse cancelGameRequest() {
         gameManager.cancelGameRequest();
+        String ret = String.format("Hello !");
+        return new HelloResponse(ret);
+    }
+    @ResponseBody
+    @GetMapping("/set-round-choice")
+    public HelloResponse setRoundChoice(@RequestParam(value = "gameChoice") GameChoice gameChoice) {
+        gameManager.setRoundChoice(gameChoice);
         String ret = String.format("Hello !");
         return new HelloResponse(ret);
     }

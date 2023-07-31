@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface GameRoundRepository extends JpaRepository<GameRoundEntity, Long> {
     List<GameRoundEntity> findByGame(GameEntity game);
+
+    GameRoundEntity findByGameAndRoundNumber(GameEntity game, int roundNumber);
 }

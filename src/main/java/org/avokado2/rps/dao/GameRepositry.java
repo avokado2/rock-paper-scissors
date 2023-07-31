@@ -9,6 +9,6 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface GameRepositry extends JpaRepository<GameEntity, Long> {
-    List<GameEntity> findByPlayer1(PlayerEntity player1, boolean completed);
-    List<GameEntity> findByPlayer2(PlayerEntity player2, boolean completed);
+    List<GameEntity> findByPlayer1AndCompleted(PlayerEntity player1, boolean completed);
+    List<GameEntity> findByPlayer2AndCompleted(PlayerEntity player2, boolean completed);
 }

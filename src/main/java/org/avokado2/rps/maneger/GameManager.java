@@ -32,6 +32,7 @@ public class GameManager {
 
      private final PlayerManager playerManager;
 
+
     @Transactional
     public boolean createGame(long gameRequestId1, long gameRequestId2, int roundsCount ) {
         Optional<GameRequestEntity> gameRequest1 = gameRequestRepository.findById(gameRequestId1);
@@ -44,9 +45,10 @@ public class GameManager {
         game.setPlayer1(playerE1);
         PlayerEntity playerE2 = gameRequest2.get().getPlayer();
         game.setPlayer2(playerE2);
+        game.setCurrentRound(1);
         game.setRoundsCount(roundsCount);
 
-        // Create first round with null values for choice1 and choice2
+        gameRepositry.save(game);
         GameRoundEntity round = new GameRoundEntity();
         round.setGame(game);
         round.setRoundNumber(1);
@@ -54,21 +56,15 @@ public class GameManager {
         round.setChoice2(null);
         gameRoundRepository.save(round);
 
-        gameRepositry.save(game);
         gameRequestRepository.delete(gameRequest1.get());
         gameRequestRepository.delete(gameRequest2.get());
         return true;
     }
 
-    @Transactional
-    public void playRound(long gameId, GameChoice choicePlayer1, GameChoice choicePlayer2) {
+
+    private void playRound(GameEntity game, GameChoice choicePlayer1, GameChoice choicePlayer2) {
         int winner = pickAWinner(choicePlayer1, choicePlayer2);
 
-        Optional<GameEntity> optionalGame = gameRepositry.findById(gameId);
-        if (optionalGame.isEmpty()) {
-            throw new RuntimeException("game not found");
-        }
-        GameEntity game = optionalGame.get();
         if (game.isCompleted()) {
             throw new RuntimeException("Game is already completed");
         }
@@ -78,18 +74,15 @@ public class GameManager {
             game.setScore2(game.getScore2() + 1);
         }
         game.setCurrentRound(game.getCurrentRound() + 1);
-        if (game.getCurrentRound() == game.getRoundsCount()) {
+        int roundC = game.getRoundsCount() + 1;
+        if (game.getCurrentRound() == roundC) {
             game.setCompleted(true);
         }
-
+        if (game.isCompleted()){
+            game.setCurrentRound(game.getRoundsCount());
+        }
         gameRepositry.save(game);
 
-        GameRoundEntity gameRound = new GameRoundEntity();
-        gameRound.setGame(game);
-        gameRound.setRoundNumber(game.getCurrentRound());
-        gameRound.setChoice1(choicePlayer1);
-        gameRound.setChoice2(choicePlayer2);
-        gameRoundRepository.save(gameRound);
 
         if (game.isCompleted() && game.getScore1() != game.getScore2()) {
             Optional<PlayerEntity> playerEntity1 = playerRepositry.findById(game.getPlayer1().getId());
@@ -105,8 +98,12 @@ public class GameManager {
             }
             playerRepositry.save(player1);
             playerRepositry.save(player2);
-
-
+        }
+        if (!game.isCompleted()) {
+            GameRoundEntity gameRoundEntity = new GameRoundEntity();
+            gameRoundEntity.setGame(game);
+            gameRoundEntity.setRoundNumber(game.getCurrentRound());
+            gameRoundRepository.save(gameRoundEntity);
         }
     }
 
@@ -145,8 +142,8 @@ public class GameManager {
     public boolean startGameRequest(int numberOfPlayers) {
         PlayerEntity playerE = playerRepositry.getReferenceById(playerManager.getCurrentPlayerId());
         List<GameRequestEntity> gameRequests = gameRequestRepository.findByPlayer(playerE);
-        List<GameEntity> gameEntities1 = gameRepositry.findByPlayer1(playerE, false);
-        List<GameEntity> gameEntities2 = gameRepositry.findByPlayer2(playerE, false);
+        List<GameEntity> gameEntities1 = gameRepositry.findByPlayer1AndCompleted(playerE, false);
+        List<GameEntity> gameEntities2 = gameRepositry.findByPlayer2AndCompleted(playerE, false);
         if (!gameEntities1.isEmpty()){
             return false;
         }
@@ -173,4 +170,41 @@ public class GameManager {
         }
     }
 
+    @Transactional
+    public void setRoundChoice(GameChoice gameChoice) {
+        PlayerEntity currentPlayer = playerRepositry.getReferenceById(playerManager.getCurrentPlayerId());
+        List<GameEntity> gameEntities1 = gameRepositry.findByPlayer1AndCompleted(currentPlayer, false);
+        GameEntity currentGame ;
+        if (!gameEntities1.isEmpty()){
+            currentGame = gameEntities1.get(0);
+        } else {
+            List<GameEntity> gameEntities2 = gameRepositry.findByPlayer2AndCompleted(currentPlayer, false);
+            if (!gameEntities2.isEmpty()) {
+                currentGame = gameEntities2.get(0);
+            } else {
+                return;
+            }
+        }
+        GameRoundEntity currentRound = gameRoundRepository.findByGameAndRoundNumber(currentGame, currentGame.getCurrentRound());
+
+        if (currentPlayer.getId().equals(currentGame.getPlayer1().getId())) {
+            if (currentRound.getChoice1() == null ) {
+                currentRound.setChoice1(gameChoice);
+            } else {
+                return;
+            }
+        } else {
+            if (currentRound.getChoice2() == null ) {
+                currentRound.setChoice2(gameChoice);
+            } else {
+                return;
+            }
+
+        }
+        gameRoundRepository.save(currentRound);
+
+        if (currentRound.getChoice1() != null && currentRound.getChoice2() != null) {
+            playRound(currentGame, currentRound.getChoice1(), currentRound.getChoice2());
+        }
+    }
 }
