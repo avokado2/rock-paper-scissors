@@ -16,24 +16,49 @@ function onChatMessageClick() {
         if (res.status == 'ok')  {
           el.value = '';
         } else {
-          // TODO: show res.errorMessage inside chat
+          addChatMessageError(res.errorMessage);
         }
       });
   return false;
 }
-function addChatMessage(chatMessage) {
+function addChatMessage(msg) {
   var elMessages = document.getElementById('chat-messages');
   var chatMessage = document.createElement('div');
   chatMessage.className='chat-message';
   var chatMessageNickname = document.createElement('span');
   chatMessageNickname.className='chat-message-nickname';
-  chatMessageNickname.innerText= chatMessage.nickname + ': ';
+  chatMessageNickname.innerText= msg.nickname + ': ';
   chatMessage.appendChild(chatMessageNickname);
-  var txt = document.createTextNode(chatMessage.text);
+  var txt = document.createTextNode(msg.text);
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
 }
-const stompClient = new StompJs.Client({
+function addChatMessageError(msgError) {
+  var elMessages = document.getElementById('chat-messages');
+  var chatMessage = document.createElement('div');
+  chatMessage.className='chat-message-error';
+  var txt = document.createTextNode(msgError);
+  chatMessage.appendChild(txt);
+  elMessages.insertBefore(chatMessage, elMessages.firstChild);
+}
+function loadChatMessages() {
+fetch('/chat/get-messages?gameId=0', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, text/plain, */*'
+      }
+    }).then(res => res.json())
+      .then(res => {
+        console.log(res);
+        res.reverse().forEach((msg) => {
+         addChatMessage(msg);
+        });
+      });
+}
+
+
+
+ const stompClient = new StompJs.Client({
     brokerURL: 'ws://localhost:8080/websocket'
 });
 
@@ -41,6 +66,7 @@ stompClient.onConnect = (frame) => {
     console.log('Connected: ' + frame);
     stompClient.subscribe('/topic/chat-messages/0', (chatMessage) => {
         console.log(chatMessage);
+        chatMessage = JSON.parse(chatMessage.body);
         addChatMessage(chatMessage);
     });
 };

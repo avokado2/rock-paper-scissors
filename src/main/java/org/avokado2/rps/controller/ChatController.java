@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.avokado2.rps.exception.ManagerException;
 import org.avokado2.rps.maneger.ChatMessageManager;
-import org.avokado2.rps.protocol.ChatAddMessageRequest;
-import org.avokado2.rps.protocol.EmptyResponse;
-import org.avokado2.rps.protocol.ErrorResponse;
-import org.avokado2.rps.protocol.HelloResponse;
+import org.avokado2.rps.protocol.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +23,13 @@ public class ChatController {
         chatMessageManager.addMessage(request.getGameId(), request.getMessage());
         //playerManager.createPlayer();
         return new EmptyResponse();
+    }
+
+    @ResponseBody
+    @GetMapping("/get-messages")
+    public List<ChatMessage> getMessages(@RequestParam(value = "gameId", defaultValue = "0") long gameId) {
+        return chatMessageManager.getMessages(gameId);
+
     }
 
     @ResponseBody

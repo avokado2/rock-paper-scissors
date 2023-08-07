@@ -1,10 +1,7 @@
 package org.avokado2.rps.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.avokado2.rps.maneger.ChatMessageManager;
-import org.avokado2.rps.maneger.GameManager;
-import org.avokado2.rps.maneger.PlayerManager;
-import org.avokado2.rps.maneger.ScheduledTaskManager;
+import org.avokado2.rps.maneger.*;
 import org.avokado2.rps.model.ChatMessageEntity;
 import org.avokado2.rps.model.GameChoice;
 import org.avokado2.rps.model.PlayerEntity;
@@ -34,6 +31,8 @@ public class TestController {
 
     private final ScheduledTaskManager taskManager;
 
+    private final SettingManager settingManager;
+
     @Autowired
     private  PasswordEncoder passwordEncoder;
     @ResponseBody
@@ -44,28 +43,13 @@ public class TestController {
         return new HelloResponse(ret);
     }
     @ResponseBody
-    @GetMapping("/add-message")
-    public HelloResponse addMessage(@RequestParam(value = "gameId", defaultValue = "0") long gameId,
-                                    @RequestParam(value = "message", defaultValue = "hello") String message) {
-        chatMessageManager.addMessage(gameId, message);
-        //playerManager.createPlayer();
-        String ret = String.format("Hello %s! PasHash %s", message, passwordEncoder.encode(message));
+    @GetMapping("/invalidate-settings")
+    public HelloResponse invalidateSettings() {
+        settingManager.invalidateAll();
+        String ret = String.format("Hello ! PasHash ");
         return new HelloResponse(ret);
     }
-    @ResponseBody
-    @GetMapping("/get-messages")
-    public List<ChatMessage> getMessages(@RequestParam(value = "gameId", defaultValue = "0") long gameId) {
-        List<ChatMessageEntity> messageEntities = chatMessageManager.getMessages(gameId);
-        List<ChatMessage> messages = new ArrayList<>();
-        for (ChatMessageEntity entity : messageEntities) {
-            ChatMessage chatMessage = new ChatMessage();
-            chatMessage.setMessage(entity.getMessage());
-            chatMessage.setTimestamp(entity.getTimestamp());
-            chatMessage.setLogin(entity.getPlayer().getLogin());
-            messages.add(chatMessage);
-        }
-        return messages;
-    }
+
 
 
     @ResponseBody
