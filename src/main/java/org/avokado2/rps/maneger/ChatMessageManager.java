@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
 @Service
@@ -33,12 +35,23 @@ public class ChatMessageManager {
 
     private final ChatIntervalManager chatIntervalManager;
 
+    private final Pattern longWorld = Pattern.compile("[^ ]{20,}");
+
     @Transactional
     public void addMessage(long gameId, String message){
         long minMessageIntervalMs = settingManager.getMinMessageIntervalMs();
         Long ts = chatIntervalManager.getLastMessageTimestamp(playerManager.getCurrentPlayerId());
         if (ts != null && System.currentTimeMillis() - ts < minMessageIntervalMs) {
-            throw new ManagerException("sending too often , try again later");
+            long ms = minMessageIntervalMs - (System.currentTimeMillis() - ts);
+            long s = Math.round(ms / 1000.0);
+            throw new ManagerException("You can send a message in " + s + " seconds");
+        }
+        if (message.length() > 120) {
+            throw  new ManagerException("Overlong message");
+        }
+        Matcher m = longWorld.matcher(message);
+        if (m.find()) {
+            throw new ManagerException("A message cannot be longer than 20 characters");
         }
         ChatMessageEntity msg = new ChatMessageEntity();
         msg.setGameId(gameId);

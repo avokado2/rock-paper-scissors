@@ -11,4 +11,5 @@ import java.util.List;
 public interface GameRepositry extends JpaRepository<GameEntity, Long> {
     List<GameEntity> findByPlayer1AndCompleted(PlayerEntity player1, boolean completed);
     List<GameEntity> findByPlayer2AndCompleted(PlayerEntity player2, boolean completed);
+    List<GameEntity> findByPause(boolean pause);
 }

@@ -93,3 +93,48 @@ body, html {
  padding: 5px;
  border-radius: 5px;
 }
+.game{
+ display: flex;
+ flex-direction: column;
+}
+.game-header{
+ display: flex;
+ flex-direction: row;
+ padding-left: 5px;
+ padding-right: 5px;
+ border-bottom: 4mm ridge rgba(0, 0, 0, 1);
+}
+.game-header-nickname{
+ flex: 1;
+ padding: 5px;
+}
+.game-header-logo{
+ flex: 1;
+ text-align: center;
+ padding: 5px;
+}
+.game-header-rating{
+ flex: 1;
+ text-align: right;
+ padding: 5px;
+}
+.game-body{
+ display: flex;
+ flex-direction: column;
+ flex: 1;
+}
+.game-body-top{
+ display: flex;
+ flex-direction: column-reverse;
+ flex: 1;
+}
+.game-body-top-wait-message{
+ text-align: center;
+ padding: 20px;
+}
+.game-body-middle{
+ text-align: center;
+}
+.game-body-bottom{
+ flex: 1;
+}

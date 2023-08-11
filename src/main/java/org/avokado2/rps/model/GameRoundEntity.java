@@ -32,6 +32,8 @@ public class GameRoundEntity {
 
     @Column(name = "update_ts", insertable = false, updatable = false)
     private Date updateTs;
+
+    private Integer winner;
 }
 
 

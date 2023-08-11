@@ -3,34 +3,39 @@ package org.avokado2.rps.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.avokado2.rps.exception.ManagerException;
-import org.avokado2.rps.maneger.ChatMessageManager;
-import org.avokado2.rps.protocol.*;
+import org.avokado2.rps.maneger.GameManager;
+import org.avokado2.rps.protocol.ChatAddMessageRequest;
+import org.avokado2.rps.protocol.EmptyResponse;
+import org.avokado2.rps.protocol.ErrorResponse;
+import org.avokado2.rps.protocol.GameStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/chat")
-public class ChatController {
+@RequestMapping("/game")
+public class GameController {
 
-    private final ChatMessageManager chatMessageManager;
-
+    private final GameManager gameManager;
 
     @ResponseBody
-    @PostMapping("/add-message")
-    public EmptyResponse addMessage(@RequestBody ChatAddMessageRequest request) {
-        chatMessageManager.addMessage(request.getGameId(), request.getMessage());
-        //playerManager.createPlayer();
+    @GetMapping("/get-status")
+    public GameStatus getStatus() {
+        return gameManager.getGameStatus();
+    }
+
+    @ResponseBody
+    @PostMapping("/start-game")
+    public EmptyResponse startGame() {
+        gameManager.startGameRequest(2);
         return new EmptyResponse();
     }
 
     @ResponseBody
-    @GetMapping("/get-messages")
-    public List<ChatMessage> getMessages(@RequestParam(value = "gameId", defaultValue = "0") long gameId) {
-        return chatMessageManager.getMessages(gameId);
-
+    @PostMapping("/cancel-game")
+    public EmptyResponse cancelGame() {
+        gameManager.cancelGameRequest();
+        return new EmptyResponse();
     }
 
     @ResponseBody

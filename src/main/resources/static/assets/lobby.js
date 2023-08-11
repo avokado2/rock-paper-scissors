@@ -41,6 +41,69 @@ function addChatMessageError(msgError) {
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
 }
+function onStartGameClick(){
+ fetch('/game/start-game', {
+       method: 'POST',
+       headers: {
+         'Accept': 'application/json, text/plain, */*',
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({numberOfPlayers: 2})
+     }).then(res => res.json())
+       .then(res => {
+         console.log(res);
+         if (res.status == 'ok')  {
+
+         } else {
+           addChatMessageError(res.errorMessage);
+         }
+       });
+}
+function onCancelClick(){
+  fetch('/game/cancel-game', {
+         method: 'POST',
+         headers: {
+           'Accept': 'application/json, text/plain, */*',
+           'Content-Type': 'application/json'
+         },
+         body: JSON.stringify({})
+       }).then(res => res.json())
+         .then(res => {
+           console.log(res);
+           if (res.status == 'ok')  {
+
+           } else {
+             addChatMessageError(res.errorMessage);
+           }
+         });
+}
+function updateGameStatus(){
+fetch('/game/get-status', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, text/plain, */*'
+      }
+    }).then(res => res.json())
+      .then(res => {
+        console.log(res);
+         var elStartGameBtn = document.getElementById('start-game-btn');
+         var elCancelBtn = document.getElementById('cancel-btn');
+         var elWaitingText = document.getElementById('waiting-text');
+        if (res.type == 'init'){
+          elWaitingText.style.display='none';
+          elStartGameBtn.style.display='';
+          elCancelBtn.style.display='none';
+        } else if (res.type == 'running') {
+         elWaitingText.style.display='none';
+         elStartGameBtn.style.display='none';
+         elCancelBtn.style.display='none';
+        } else if (res.type == 'waitForGame'){
+         elWaitingText.style.display='';
+         elStartGameBtn.style.display='none';
+         elCancelBtn.style.display='';
+        }
+      });
+}
 function loadChatMessages() {
 fetch('/chat/get-messages?gameId=0', {
       method: 'GET',

@@ -38,4 +38,6 @@ public class GameEntity {
     private Date updateAt;
 
     private boolean completed;
+
+    private boolean pause;
 }
