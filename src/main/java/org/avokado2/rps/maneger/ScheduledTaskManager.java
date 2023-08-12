@@ -27,7 +27,7 @@ public class ScheduledTaskManager {
     private final SettingManager settingManager;
 
 
-    // @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000)
     public void createGamesJob() {
         //получение всех gameRequest
         List<GameRequestEntity> gameRequestEntities = gameRequestRepository.findAll();

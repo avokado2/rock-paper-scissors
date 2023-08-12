@@ -32,6 +32,17 @@ public class GameController {
     }
 
     @ResponseBody
+    @GetMapping("/start-game-request")
+    public EmptyResponse startGameRequest(@RequestParam(value = "numberOfPlayers") int numberOfPlayers) {
+        if(numberOfPlayers != 2 && numberOfPlayers != 3) {
+            throw new RuntimeException("incorrect value of players! Expected 2 or 3");
+        }
+        gameManager.startGameRequest(numberOfPlayers);
+        return new EmptyResponse();
+    }
+
+
+    @ResponseBody
     @PostMapping("/cancel-game")
     public EmptyResponse cancelGame() {
         gameManager.cancelGameRequest();

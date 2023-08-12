@@ -11,6 +11,7 @@ import org.avokado2.rps.dao.PlayerRepositry;
 import org.avokado2.rps.model.*;
 import org.avokado2.rps.protocol.GameStatus;
 import org.avokado2.rps.protocol.GameStatusType;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,8 @@ public class GameManager {
      private final GameRequestRepository gameRequestRepository;
 
      private final PlayerManager playerManager;
+
+     private final ApplicationEventPublisher publisher;
 
 
     @Transactional
@@ -60,6 +63,8 @@ public class GameManager {
 
         gameRequestRepository.delete(gameRequest1.get());
         gameRequestRepository.delete(gameRequest2.get());
+        publisher.publishEvent(new GameStatusUpdateEvent(playerE1.getLogin()));
+        publisher.publishEvent(new GameStatusUpdateEvent(playerE2.getLogin()));
         return true;
     }
 
@@ -78,38 +83,8 @@ public class GameManager {
         } else if (winner == 2){
             game.setScore2(game.getScore2() + 1);
         }
-//        game.setCurrentRound(game.getCurrentRound() + 1);
-//        int roundC = game.getRoundsCount() + 1;
-//        if (game.getCurrentRound() == roundC) {
-//            game.setCompleted(true);
-//        }
-//        if (game.isCompleted()){
-//            game.setCurrentRound(game.getRoundsCount());
-//        }
         gameRepositry.save(game);
 
-
-//        if (game.isCompleted() && game.getScore1() != game.getScore2()) {
-//            Optional<PlayerEntity> playerEntity1 = playerRepositry.findById(game.getPlayer1().getId());
-//            Optional<PlayerEntity> playerEntity2 = playerRepositry.findById(game.getPlayer2().getId());
-//            PlayerEntity player1 = playerEntity1.get();
-//            PlayerEntity player2 = playerEntity2.get();
-//            if (game.getScore1() > game.getScore2()) {
-//                player1.setRating(player1.getRating() + 5);
-//                player2.setRating(player2.getRating() - 5);
-//            } else {
-//                player1.setRating(player1.getRating() - 5);
-//                player2.setRating(player2.getRating() + 5);
-//            }
-//            playerRepositry.save(player1);
-//            playerRepositry.save(player2);
-//        }
-//        if (!game.isCompleted()) {
-//            GameRoundEntity gameRoundEntity = new GameRoundEntity();
-//            gameRoundEntity.setGame(game);
-//            gameRoundEntity.setRoundNumber(game.getCurrentRound());
-//            gameRoundRepository.save(gameRoundEntity);
-//        }
     }
 
     @Transactional
@@ -146,6 +121,8 @@ public class GameManager {
             gameRoundEntity.setRoundNumber(game.getCurrentRound());
             gameRoundRepository.save(gameRoundEntity);
         }
+        publisher.publishEvent(new GameStatusUpdateEvent(game.getPlayer1().getLogin()));
+        publisher.publishEvent(new GameStatusUpdateEvent(game.getPlayer2().getLogin()));
     }
     private int pickAWinner (GameChoice choicePlayer1, GameChoice choicePlayer2) {
         int scorePlayer1 = 0;
@@ -198,6 +175,7 @@ public class GameManager {
         gameRequest.setNumberOfPlayers(numberOfPlayers);
         gameRequest.setPlayer(playerE);
         gameRequestRepository.save(gameRequest);
+        publisher.publishEvent(new GameStatusUpdateEvent(playerE.getLogin()));
         return true;
     }
 
@@ -246,15 +224,20 @@ public class GameManager {
         if (currentRound.getChoice1() != null && currentRound.getChoice2() != null) {
             playRound(currentGame, currentRound);
         }
+        publisher.publishEvent(new GameStatusUpdateEvent(currentGame.getPlayer1().getLogin()));
+        publisher.publishEvent(new GameStatusUpdateEvent(currentGame.getPlayer2().getLogin()));
     }
 
     public GameStatus getGameStatus() {
 
         GameEntity gameEntity = getCurrentGame();
+        PlayerEntity playerE = playerRepositry.getById(playerManager.getCurrentPlayerId());
+        GameStatus gameStatus = new GameStatus();
+        gameStatus.setSelfNickname(playerE.getLogin());
+        gameStatus.setSelfRating(playerE.getRating());
         if (gameEntity != null){
             int playerId = playerManager.getCurrentPlayerId();
             boolean firstPlayer = gameEntity.getPlayer1().getId() == playerId;
-            GameStatus gameStatus = new GameStatus();
             gameStatus.setType(GameStatusType.running);
             gameStatus.setCurrentRound(gameEntity.getCurrentRound());
             gameStatus.setRoundsCount(gameEntity.getRoundsCount());
@@ -262,28 +245,33 @@ public class GameManager {
             if (firstPlayer) {
                 gameStatus.setSelfChoice(gameRound.getChoice1());
                 gameStatus.setEnemyChoice(gameRound.getChoice2());
+                gameStatus.setSelfScore(gameEntity.getScore1());
+                gameStatus.setEnemyScore(gameEntity.getScore2());
+                gameStatus.setEnemyNickname(gameEntity.getPlayer2().getLogin());
+                gameStatus.setEnemyRating(gameEntity.getPlayer2().getRating());
                 if (gameRound.getWinner() != null) {
                     gameStatus.setWinner(gameRound.getWinner() == 1);
                 }
             } else {
                 gameStatus.setSelfChoice(gameRound.getChoice2());
                 gameStatus.setEnemyChoice(gameRound.getChoice1());
+                gameStatus.setSelfScore(gameEntity.getScore2());
+                gameStatus.setEnemyScore(gameEntity.getScore1());
+                gameStatus.setEnemyNickname(gameEntity.getPlayer1().getLogin());
+                gameStatus.setEnemyRating(gameEntity.getPlayer1().getRating());
                 if (gameRound.getWinner() != null) {
                     gameStatus.setWinner(gameRound.getWinner() == 2);
                 }
             }
-            return gameStatus;
         } else {
-            PlayerEntity playerE = playerRepositry.getReferenceById(playerManager.getCurrentPlayerId());
             List<GameRequestEntity> gameRequest = gameRequestRepository.findByPlayer(playerE);
-            GameStatus gameStatus = new GameStatus();
             if (gameRequest.isEmpty()) {
                 gameStatus.setType(GameStatusType.init);
             } else {
                 gameStatus.setType(GameStatusType.waitForGame);
             }
-            return gameStatus;
         }
+        return gameStatus;
     }
 
     private GameEntity getCurrentGame() {

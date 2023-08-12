@@ -19,4 +19,16 @@ public class GameStatus {
     private GameChoice enemyChoice;
 
     private Boolean winner;
+
+    private int selfScore;
+
+    private int enemyScore;
+
+    private String selfNickname;
+
+    private String enemyNickname;
+
+    private int selfRating;
+
+    private int enemyRating;
 }

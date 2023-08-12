@@ -132,6 +132,10 @@ stompClient.onConnect = (frame) => {
         chatMessage = JSON.parse(chatMessage.body);
         addChatMessage(chatMessage);
     });
+    stompClient.subscribe('/user/game', (gameStatusUpdate) => {
+            console.log(gameStatusUpdate);
+            updateGameStatus();
+        });
 };
 
 stompClient.onWebSocketError = (error) => {
