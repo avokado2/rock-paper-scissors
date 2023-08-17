@@ -177,7 +177,7 @@ body, html {
  box-shadow: 10px 10px 10px 1px rgba(0, 0, 255, .2);
  border: 3px dashed white;
  padding: 20px 50px 20px 50px;
- animation: body-running-completed 3s ease-in-out;
+ animation: body-running-completed 17s ease-in-out;
  color: wheat;
  background-color: blue;
 }
@@ -188,10 +188,20 @@ body, html {
     opacity: 0;
     transform: rotate(-720deg);
   }
-  100% {
+  50% {
+       top: 186px;
+       opacity: 1;
+       transform: rotate(0);
+     }
+  80% {
     top: 186px;
     opacity: 1;
     transform: rotate(0);
+  }
+  100% {
+    top: 0px;
+    opacity: 0;
+    transform: rotate(-720deg);
   }
 }
 

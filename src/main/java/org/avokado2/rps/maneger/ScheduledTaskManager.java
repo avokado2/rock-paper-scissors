@@ -44,8 +44,14 @@ public class ScheduledTaskManager {
     @Scheduled(fixedDelay = 3000)
     public void startNextRoundJob() {
         List<GameEntity> gameEntityList = gameRepositry.findByPause(true);
+        long pause;
         for (GameEntity g: gameEntityList) {
-            if (System.currentTimeMillis() > g.getUpdateAt().getTime() + settingManager.getRoundPauseMs()){
+            if (g.getCurrentRound() == g.getRoundsCount()) {
+                pause = settingManager.getLastRoundPauseMs();
+            } else {
+                pause = settingManager.getRoundPauseMs();
+            }
+            if (System.currentTimeMillis() > g.getUpdateAt().getTime() + pause){
                 gameManager.startNewRound(g.getId());
             }
         }

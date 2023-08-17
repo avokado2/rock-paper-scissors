@@ -151,6 +151,7 @@ fetch('/game/get-status', {
          var elEnemyScore = document.getElementById('enemy-score');
          var elEnemyNickname = document.getElementById('enemy-nickname');
          var elCompleted = document.getElementById('player-completed');
+         var elSendChoice = document.getElementById('send-choice-btn');
          if (res.type == 'init'){
             elWaitingText.style.display='none';
             elStartGameBtn.style.display='';
@@ -158,6 +159,8 @@ fetch('/game/get-status', {
             elGameRunning.style.display='none';
             elGameInit.style.display='';
          } else if (res.type == 'running') {
+            var audio = null;
+            elSendChoice.style.display='';
             elWaitingText.style.display='none';
             elStartGameBtn.style.display='none';
             elCancelBtn.style.display='none';
@@ -175,9 +178,11 @@ fetch('/game/get-status', {
                 resetSelfChoices();
                 resetEnemyChoices();
                 if (res.winner) {
+                    audio = new Audio('/assets/music/round_win.mp3');
                     setSelfChoiceColor(res.selfChoice, "_win");
                     setEnemyChoiceColor(res.enemyChoice, "_lose");
                 } else if (res.enemyWinner) {
+                    audio = new Audio('/assets/music/round_lose.mp3');
                     setSelfChoiceColor(res.selfChoice, "_lose");
                     setEnemyChoiceColor(res.enemyChoice, "_win");
                 } else {
@@ -188,21 +193,20 @@ fetch('/game/get-status', {
                 }
                 allowChoice = false;
             }
+            if (!allowChoice) {
+                elSendChoice.style.display='none';
+            }
             elSelfScore.innerText = res.selfScore;
             elEnemyScore.innerText = res.enemyScore;
             elEnemyNickname.innerText = res.enemyNickname + " (" + res.enemyRating + ")";
             if (res.currentRound == res.roundsCount && !(res.winner == null)){
                 elCompleted.style.display='';
                 if (res.enemyScore > res.selfScore) {
-                    var audioLose = new Audio('/assets/lose_marsh.mp3');
+                    audio = new Audio('/assets/music/game_lose.wav');
                     elCompleted.innerText = "Lose";
-                    audioLose.volume = 0.5;
-                    audioLose.play();
                 } else if (res.enemyScore < res.selfScore){
-                    var audioWin = new Audio('/assets/win.mp3');
+                    audio = new Audio('/assets/music/game_win.wav');
                     elCompleted.innerText = "Win";
-                    audioWin.volume = 0.5;
-                    audioWin.play();
                 } else {
                     elCompleted.innerText = "Draw";
                 }
@@ -215,6 +219,9 @@ fetch('/game/get-status', {
                 elCompleted.style.left = left + 'px';
             } else {
                 elCompleted.style.display='none';
+            }
+            if (audio) {
+                audio.play();
             }
          } else if (res.type == 'waitForGame'){
             elWaitingText.style.display='';
