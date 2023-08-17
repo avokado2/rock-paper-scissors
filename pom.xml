@@ -14,7 +14,7 @@
 	<name>rock-paper-scissors</name>
 	<description>multiplayer game of rock paper scissors on springboot</description>
 	<properties>
-		<java.version>20</java.version>
+		<java.version>19</java.version>
 	</properties>
 	<dependencies>
 		<!-- актуатор это библиотека которая позволяет узнать статус сервера  -->
@@ -131,6 +131,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<executable>true</executable>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
