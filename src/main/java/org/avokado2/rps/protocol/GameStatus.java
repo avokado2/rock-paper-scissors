@@ -20,6 +20,8 @@ public class GameStatus {
 
     private Boolean winner;
 
+    private Boolean enemyWinner;
+
     private int selfScore;
 
     private int enemyScore;
@@ -31,4 +33,6 @@ public class GameStatus {
     private int selfRating;
 
     private int enemyRating;
+
+    // private boolean roundCompleted;
 }

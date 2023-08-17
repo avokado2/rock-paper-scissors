@@ -138,3 +138,103 @@ body, html {
 .game-body-bottom{
  flex: 1;
 }
+.game-body-running{
+ display: flex;
+ flex-direction: row;
+ flex: 1;
+}
+.game-body-running-player{
+ display: flex;
+ flex-direction: column;
+ flex: 1;
+}
+.game-body-running-player-choices{
+ display: flex;
+ flex-direction: column;
+ flex: 1;
+}
+.game-body-running-player-score{
+ text-align: center;
+ padding: 10px;
+ font-size: 16px;
+}
+.game-body-running-player-bottom{
+ text-align: center;
+ padding: 5px;
+}
+.player-choice{
+ text-align: center;
+}
+.player-choice-img{
+ height: 3rem;
+}
+.player-choice-spacer{
+ flex: 1;
+}
+.game-body-running-completed{
+ position: absolute;
+ top: 186px;
+ box-shadow: 10px 10px 10px 1px rgba(0, 0, 255, .2);
+ border: 3px dashed white;
+ padding: 20px 50px 20px 50px;
+ animation: body-running-completed 3s ease-in-out;
+ color: wheat;
+ background-color: blue;
+}
+
+@keyframes body-running-completed {
+  0% {
+    top: 0px;
+    opacity: 0;
+    transform: rotate(-720deg);
+  }
+  100% {
+    top: 186px;
+    opacity: 1;
+    transform: rotate(0);
+  }
+}
+
+/*.admin-lobby{
+ display: flex;
+ flex-direction: column;
+ flex: 1;
+}
+.admin-lobby-button{
+ display: flex;
+ flex-direction: column;
+ flex: 1;
+}
+.admin-lobby-button-chat{
+ display: flex;
+ flex-direction: row;
+ flex: 1;
+}
+.admin-lobby-button-player{
+ display: flex;
+ flex-direction: row;
+ flex: 1;
+}
+.admin-lobby-button-menu{
+ display: flex;
+ flex-direction: row;
+ flex: 1;
+}
+.admin-lobby-button-chat{
+ padding-top: 20px;
+ padding-bottom: 20px;
+ padding-right: 50px;
+ padding-left: 25px;
+}
+.admin-lobby-button-player{
+ padding-top: 20px;
+ padding-bottom: 20px;
+ padding-right: 50px;
+ padding-left: 25px;
+}
+.admin-lobby-button-menu{
+ padding-top: 20px;
+ padding-bottom: 20px;
+ padding-right: 50px;
+ padding-left: 25px;
+}*/

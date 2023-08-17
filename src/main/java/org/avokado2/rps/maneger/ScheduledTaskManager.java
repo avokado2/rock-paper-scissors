@@ -29,12 +29,7 @@ public class ScheduledTaskManager {
 
     @Scheduled(fixedDelay = 5000)
     public void createGamesJob() {
-        //получение всех gameRequest
-        List<GameRequestEntity> gameRequestEntities = gameRequestRepository.findAll();
-        //удаление запросов с тремя игроками
-        gameRequestEntities.removeIf(request -> request.getNumberOfPlayers() == 3);
-        //сортировка по рейтингу игроков
-        gameRequestEntities.sort(Comparator.comparingInt(request -> request.getPlayer().getRating()));
+        List<GameRequestEntity> gameRequestEntities = gameManager.getPendingRequest();
         //разбиение на пары
         List<Pair<GameRequestEntity, GameRequestEntity>> pairList = new ArrayList<>();
         for (int i = 0; i < gameRequestEntities.size() - 1; i += 2) {
@@ -51,7 +46,7 @@ public class ScheduledTaskManager {
         List<GameEntity> gameEntityList = gameRepositry.findByPause(true);
         for (GameEntity g: gameEntityList) {
             if (System.currentTimeMillis() > g.getUpdateAt().getTime() + settingManager.getRoundPauseMs()){
-                gameManager.startNewRound(g);
+                gameManager.startNewRound(g.getId());
             }
         }
 

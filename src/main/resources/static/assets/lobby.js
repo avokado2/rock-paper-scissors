@@ -1,3 +1,5 @@
+var selfChoice = null;
+var allowChoice = true;
 function onChatMessageClick() {
   var el = document.getElementById('chat-message-input');
   if (!el.value) {
@@ -41,6 +43,38 @@ function addChatMessageError(msgError) {
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
 }
+function onPlayerChoice(choice) {
+  if(!allowChoice) {
+    return;
+  }
+  resetSelfChoices();
+  setSelfChoiceColor(choice, "_sel");
+  selfChoice = choice;
+}
+function onSendChoice(){
+if (!selfChoice) {
+    return;
+}
+if (!allowChoice) {
+    return;
+}
+ fetch('/game/set-round-choice', {
+       method: 'POST',
+       headers: {
+         'Accept': 'application/json, text/plain, */*',
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({choice: selfChoice})
+     }).then(res => res.json())
+       .then(res => {
+         console.log(res);
+         if (res.status == 'ok')  {
+
+         } else {
+           addChatMessageError(res.errorMessage);
+         }
+       });
+}
 function onStartGameClick(){
  fetch('/game/start-game', {
        method: 'POST',
@@ -77,6 +111,24 @@ function onCancelClick(){
            }
          });
 }
+function setSelfChoiceColor(choice, color) {
+  var el = document.getElementById("self-" + choice);
+  el.src="/assets/ic/" + choice + color + ".png";
+}
+function resetSelfChoices() {
+  setSelfChoiceColor("rock", "")
+  setSelfChoiceColor("paper", "")
+  setSelfChoiceColor("scissors", "")
+}
+function setEnemyChoiceColor(choice, color) {
+  var el = document.getElementById("enemy-" + choice);
+  el.src="/assets/ic/" + choice + color + ".png";
+}
+function resetEnemyChoices() {
+  setEnemyChoiceColor("rock", "")
+  setEnemyChoiceColor("paper", "")
+  setEnemyChoiceColor("scissors", "")
+}
 function updateGameStatus(){
 fetch('/game/get-status', {
       method: 'GET',
@@ -85,23 +137,92 @@ fetch('/game/get-status', {
       }
     }).then(res => res.json())
       .then(res => {
-        console.log(res);
+         console.log(res);
          var elStartGameBtn = document.getElementById('start-game-btn');
          var elCancelBtn = document.getElementById('cancel-btn');
          var elWaitingText = document.getElementById('waiting-text');
-        if (res.type == 'init'){
-          elWaitingText.style.display='none';
-          elStartGameBtn.style.display='';
-          elCancelBtn.style.display='none';
-        } else if (res.type == 'running') {
-         elWaitingText.style.display='none';
-         elStartGameBtn.style.display='none';
-         elCancelBtn.style.display='none';
-        } else if (res.type == 'waitForGame'){
-         elWaitingText.style.display='';
-         elStartGameBtn.style.display='none';
-         elCancelBtn.style.display='';
-        }
+         var elGameRunning = document.getElementById('game-body-running');
+         var elGameInit = document.getElementById('game-body-init');
+         var gameHeaderNickname = document.getElementById('nickname');
+         gameHeaderNickname.innerText = res.selfNickname;
+         var gameHeaderRating = document.getElementById('rating');
+         gameHeaderRating.innerText = res.selfRating;
+         var elSelfScore = document.getElementById('self-score');
+         var elEnemyScore = document.getElementById('enemy-score');
+         var elEnemyNickname = document.getElementById('enemy-nickname');
+         var elCompleted = document.getElementById('player-completed');
+         if (res.type == 'init'){
+            elWaitingText.style.display='none';
+            elStartGameBtn.style.display='';
+            elCancelBtn.style.display='none';
+            elGameRunning.style.display='none';
+            elGameInit.style.display='';
+         } else if (res.type == 'running') {
+            elWaitingText.style.display='none';
+            elStartGameBtn.style.display='none';
+            elCancelBtn.style.display='none';
+            elGameRunning.style.display='';
+            elGameInit.style.display='none';
+            if (!res.selfChoice) {
+                allowChoice = true;
+                resetEnemyChoices();
+                resetSelfChoices();
+                if (selfChoice){
+                    setSelfChoiceColor(selfChoice, "_sel");
+                }
+            } else {
+                selfChoice = null;
+                resetSelfChoices();
+                resetEnemyChoices();
+                if (res.winner) {
+                    setSelfChoiceColor(res.selfChoice, "_win");
+                    setEnemyChoiceColor(res.enemyChoice, "_lose");
+                } else if (res.enemyWinner) {
+                    setSelfChoiceColor(res.selfChoice, "_lose");
+                    setEnemyChoiceColor(res.enemyChoice, "_win");
+                } else {
+                    setSelfChoiceColor(res.selfChoice, "_sel");
+                    if (res.enemyChoice){
+                        setEnemyChoiceColor(res.enemyChoice, "_sel");
+                    }
+                }
+                allowChoice = false;
+            }
+            elSelfScore.innerText = res.selfScore;
+            elEnemyScore.innerText = res.enemyScore;
+            elEnemyNickname.innerText = res.enemyNickname + " (" + res.enemyRating + ")";
+            if (res.currentRound == res.roundsCount && !(res.winner == null)){
+                elCompleted.style.display='';
+                if (res.enemyScore > res.selfScore) {
+                    var audioLose = new Audio('/assets/lose_marsh.mp3');
+                    elCompleted.innerText = "Lose";
+                    audioLose.volume = 0.5;
+                    audioLose.play();
+                } else if (res.enemyScore < res.selfScore){
+                    var audioWin = new Audio('/assets/win.mp3');
+                    elCompleted.innerText = "Win";
+                    audioWin.volume = 0.5;
+                    audioWin.play();
+                } else {
+                    elCompleted.innerText = "Draw";
+                }
+                var left = elGameRunning.clientWidth - elCompleted.clientWidth;
+                if (left < 0) {
+                    left = 0;
+                } else {
+                    left = Math.round(left/2);
+                }
+                elCompleted.style.left = left + 'px';
+            } else {
+                elCompleted.style.display='none';
+            }
+         } else if (res.type == 'waitForGame'){
+            elWaitingText.style.display='';
+            elStartGameBtn.style.display='none';
+            elCancelBtn.style.display='';
+            elGameRunning.style.display='none';
+            elGameInit.style.display='';
+         }
       });
 }
 function loadChatMessages() {
@@ -132,7 +253,7 @@ stompClient.onConnect = (frame) => {
         chatMessage = JSON.parse(chatMessage.body);
         addChatMessage(chatMessage);
     });
-    stompClient.subscribe('/user/game', (gameStatusUpdate) => {
+    stompClient.subscribe('/user/queue/game', (gameStatusUpdate) => {
             console.log(gameStatusUpdate);
             updateGameStatus();
         });

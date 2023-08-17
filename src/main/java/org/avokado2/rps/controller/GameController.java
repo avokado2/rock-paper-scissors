@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.avokado2.rps.exception.ManagerException;
 import org.avokado2.rps.maneger.GameManager;
-import org.avokado2.rps.protocol.ChatAddMessageRequest;
-import org.avokado2.rps.protocol.EmptyResponse;
-import org.avokado2.rps.protocol.ErrorResponse;
-import org.avokado2.rps.protocol.GameStatus;
+import org.avokado2.rps.protocol.*;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -24,20 +21,22 @@ public class GameController {
         return gameManager.getGameStatus();
     }
 
-    @ResponseBody
-    @PostMapping("/start-game")
-    public EmptyResponse startGame() {
-        gameManager.startGameRequest(2);
-        return new EmptyResponse();
-    }
 
     @ResponseBody
-    @GetMapping("/start-game-request")
-    public EmptyResponse startGameRequest(@RequestParam(value = "numberOfPlayers") int numberOfPlayers) {
+    @PostMapping("/start-game")
+    public EmptyResponse startGame(@RequestBody StartGameRequest request ) {
+        int numberOfPlayers = request.getNumberOfPlayers();
         if(numberOfPlayers != 2 && numberOfPlayers != 3) {
             throw new RuntimeException("incorrect value of players! Expected 2 or 3");
         }
         gameManager.startGameRequest(numberOfPlayers);
+        return new EmptyResponse();
+    }
+
+    @ResponseBody
+    @PostMapping("/set-round-choice")
+    public EmptyResponse setRoundChoice(@RequestBody SetRoundChoiceRequest choiceRequest ) {
+        gameManager.setRoundChoice(choiceRequest.getChoice());
         return new EmptyResponse();
     }
 

@@ -88,7 +88,8 @@ public class GameManager {
     }
 
     @Transactional
-    public void startNewRound(GameEntity game){
+    public void startNewRound(long gameId){
+        GameEntity game = gameRepositry.getById(gameId);
         game.setCurrentRound(game.getCurrentRound() + 1);
         int roundC = game.getRoundsCount() + 1;
         if (game.getCurrentRound() == roundC) {
@@ -178,7 +179,7 @@ public class GameManager {
         publisher.publishEvent(new GameStatusUpdateEvent(playerE.getLogin()));
         return true;
     }
-
+    @Transactional
     public void cancelGameRequest() {
         PlayerEntity playerE = playerRepositry.getReferenceById(playerManager.getCurrentPlayerId());
         List<GameRequestEntity> gameRequests = gameRequestRepository.findByPlayer(playerE);
@@ -186,6 +187,17 @@ public class GameManager {
         if (gameRequests.size() > 0){
             gameRequestRepository.delete(gameRequests.get(0));
         }
+        publisher.publishEvent(new GameStatusUpdateEvent(playerE.getLogin()));
+    }
+    @Transactional
+    public List<GameRequestEntity> getPendingRequest() {
+        List<GameRequestEntity> gameRequestEntities = gameRequestRepository.findAll();
+        //удаление запросов с тремя игроками
+        gameRequestEntities.removeIf(request -> request.getNumberOfPlayers() == 3);
+        //сортировка по рейтингу игроков
+        gameRequestEntities.sort(Comparator.comparingInt(request -> request.getPlayer().getRating()));
+
+        return gameRequestEntities;
     }
 
     @Transactional
@@ -244,23 +256,29 @@ public class GameManager {
             GameRoundEntity gameRound = gameRoundRepository.findByGameAndRoundNumber(gameEntity, gameEntity.getCurrentRound());
             if (firstPlayer) {
                 gameStatus.setSelfChoice(gameRound.getChoice1());
-                gameStatus.setEnemyChoice(gameRound.getChoice2());
+                if (gameStatus.getSelfChoice() != null) {
+                    gameStatus.setEnemyChoice(gameRound.getChoice2());
+                }
                 gameStatus.setSelfScore(gameEntity.getScore1());
                 gameStatus.setEnemyScore(gameEntity.getScore2());
                 gameStatus.setEnemyNickname(gameEntity.getPlayer2().getLogin());
                 gameStatus.setEnemyRating(gameEntity.getPlayer2().getRating());
                 if (gameRound.getWinner() != null) {
                     gameStatus.setWinner(gameRound.getWinner() == 1);
+                    gameStatus.setEnemyWinner(gameRound.getWinner() == 2);
                 }
             } else {
                 gameStatus.setSelfChoice(gameRound.getChoice2());
-                gameStatus.setEnemyChoice(gameRound.getChoice1());
+                if (gameStatus.getSelfChoice() != null) {
+                    gameStatus.setEnemyChoice(gameRound.getChoice1());
+                }
                 gameStatus.setSelfScore(gameEntity.getScore2());
                 gameStatus.setEnemyScore(gameEntity.getScore1());
                 gameStatus.setEnemyNickname(gameEntity.getPlayer1().getLogin());
                 gameStatus.setEnemyRating(gameEntity.getPlayer1().getRating());
                 if (gameRound.getWinner() != null) {
                     gameStatus.setWinner(gameRound.getWinner() == 2);
+                    gameStatus.setEnemyWinner(gameRound.getWinner() == 1);
                 }
             }
         } else {

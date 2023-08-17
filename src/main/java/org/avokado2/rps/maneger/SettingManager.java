@@ -38,4 +38,14 @@ public class SettingManager {
 
 
     }
+
+    @Cacheable(value = "setting", key = "'game_round_pause_ms'")
+    public long getRoundCompletedPauseMs(){
+        SettingEntity setting = settingRepository.findByName("game_round_completed_pause_ms");
+        if (setting != null) {
+            return Long.parseLong(setting.getValue());
+        } else {
+            return 0;
+        }
+    }
 }

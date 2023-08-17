@@ -9,14 +9,39 @@
 </head>
 <body onload="loadChatMessages(); updateGameStatus()">
     <div class="game-container" data-bs-theme="dark">
-
-        <div class="game">
-            <div class="game-header">
-                <div class="game-header-nickname">adhkfd</div>
-                <div class="game-header-logo">RPS</div>
-                <div class="game-header-rating">120</div>
+        <!--div class="admin">
+            <div class="admin-lobby" id="admin">
+                <div class="admin-lobby-button">
+                    <div class="admin-lobby-button-chat">
+                        <button class="btn btn-sm btn-outline-light " id="block-chat-btn"
+                                onclick="onSendChoice()"> Block the chat </button>
+                        <button class="btn btn-sm btn-outline-light " id="unblock-chat-btn"
+                                onclick="onSendChoice()"> Unblock the chat </button>
+                    </div>
+                    <div class="admin-lobby-button-player">
+                        <button class="btn btn-sm btn-outline-light " id="block-player-btn"
+                                onclick="onSendChoice()"> block the player </button>
+                        <button class="btn btn-sm btn-outline-light " id="unblock-player-btn"
+                                onclick="onSendChoice()"> Unblock the player </button>
+                    </div>
+                    <div class="admin-lobby-button-menu">
+                        <button class="btn btn-sm btn-outline-light " id="choice-game-room-btn"
+                                onclick="onSendChoice()"> Choice game room </button>
+                        <button class="btn btn-sm btn-outline-light " id="admin-chat-btn"
+                                onclick="onSendChoice()"> Admin chat </button>
+                    </div>
+                </div>
+                <div class="admin-lobby-chat"></div>
+                <div class="admin-lobby-input-box"></div>
             </div>
-            <div class="game-body">
+        </div-->
+        <div class="game">
+            <div class="game-header" id="game-header">
+                <div class="game-header-nickname" id="nickname"></div>
+                <div class="game-header-logo">RPS</div>
+                <div class="game-header-rating" id="rating"></div>
+            </div>
+            <div class="game-body" id="game-body-init">
                 <div class="game-body-top">
                     <div class="game-body-top-wait-message" id="waiting-text" style="display:none">Waiting for a rival...</div>
                 </div>
@@ -38,6 +63,55 @@
                     </svg></button>
                 </div>
                 <div class="game-body-bottom"></div>
+            </div>
+            <div class="game-body-running" id="game-body-running" style="display:none">
+                <div class="game-body-running-completed" id="player-completed" style="display:none"></div>
+                <div class="game-body-running-player">
+                    <div class="game-body-running-player-score" id="self-score"></div>
+                    <div class="game-body-running-player-choices">
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                                <img src="/assets/ic/rock.png" class="player-choice-img" id="self-rock"
+                                     onclick="onPlayerChoice('rock')">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                                <img src="/assets/ic/paper.png" class="player-choice-img" id="self-paper"
+                                     onclick="onPlayerChoice('paper')">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                                <img src="/assets/ic/scissors.png" class="player-choice-img" id="self-scissors"
+                                     onclick="onPlayerChoice('scissors')">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                    </div>
+                    <div class="game-body-running-player-bottom">
+                        <button class="btn btn-sm btn-outline-light " id="send-choice-btn"
+                                onclick="onSendChoice()"> Send choice </button>
+                    </div>
+                </div>
+                <div class="game-body-running-player">
+                    <div class="game-body-running-player-score" id="enemy-score"></div>
+                    <div class="game-body-running-player-choices">
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                            <img src="/assets/ic/rock.png" class="player-choice-img" id="enemy-rock">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                            <img src="/assets/ic/paper.png" class="player-choice-img" id="enemy-paper">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                        <div class="player-choice" style="">
+                            <img src="/assets/ic/scissors.png" class="player-choice-img" id="enemy-scissors">
+                        </div>
+                        <div class="player-choice-spacer"></div>
+                    </div>
+                    <div class="game-body-running-player-bottom">
+                        <div class="player-enemy-nickname" id="enemy-nickname"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="chat">
@@ -78,6 +152,6 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-    <script src="/assets/lobby.js" ></script>
+    <script src="/assets/lobby.js"></script>
 </body>
 </html>
