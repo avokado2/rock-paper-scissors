@@ -202,10 +202,10 @@ fetch('/game/get-status', {
             if (res.currentRound == res.roundsCount && !(res.winner == null)){
                 elCompleted.style.display='';
                 if (res.enemyScore > res.selfScore) {
-                    audio = new Audio('/assets/music/game_lose.wav');
+                    audio = new Audio('/assets/music/game_lose.mp3');
                     elCompleted.innerText = "Lose";
                 } else if (res.enemyScore < res.selfScore){
-                    audio = new Audio('/assets/music/game_win.wav');
+                    audio = new Audio('/assets/music/game_win.mp3');
                     elCompleted.innerText = "Win";
                 } else {
                     elCompleted.innerText = "Draw";
