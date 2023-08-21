@@ -33,7 +33,9 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .logout((logout) -> logout.permitAll())
-                .oauth2Login();
+                .oauth2Login((f)-> {
+                    f.loginPage("/login").defaultSuccessUrl("/lobby").permitAll();
+                });
 
         return http.build();
     }

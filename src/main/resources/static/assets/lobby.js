@@ -1,5 +1,6 @@
 var selfChoice = null;
 var allowChoice = true;
+var currentRound = 0;
 function onChatMessageClick() {
   var el = document.getElementById('chat-message-input');
   if (!el.value) {
@@ -42,6 +43,18 @@ function addChatMessageError(msgError) {
   var txt = document.createTextNode(msgError);
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
+}
+function onNewRound(roundNumber, isLastRound) {
+    var audioRound = null;
+    if (roundNumber > 0 && isLastRound != true) {
+        audioRound = new Audio('/assets/music/round_' + roundNumber + '.mp3');
+        audioRound.play();
+    } else if (isLastRound == true) {
+        audioRound = new Audio('/assets/music/round_last.mp3');
+        audioRound.play();
+    } else {
+        return;
+    }
 }
 function onPlayerChoice(choice) {
   if(!allowChoice) {
@@ -137,6 +150,7 @@ fetch('/game/get-status', {
       }
     }).then(res => res.json())
       .then(res => {
+         console.log('reply to query - get game status');
          console.log(res);
          var elStartGameBtn = document.getElementById('start-game-btn');
          var elCancelBtn = document.getElementById('cancel-btn');
@@ -158,6 +172,7 @@ fetch('/game/get-status', {
             elCancelBtn.style.display='none';
             elGameRunning.style.display='none';
             elGameInit.style.display='';
+            currentRound = 0;
          } else if (res.type == 'running') {
             var audio = null;
             elSendChoice.style.display='';
@@ -167,6 +182,10 @@ fetch('/game/get-status', {
             elGameRunning.style.display='';
             elGameInit.style.display='none';
             if (!res.selfChoice) {
+                if (currentRound < res.currentRound) {
+                    onNewRound(res.currentRound, res.currentRound == res.roundCounts);
+                    currentRound = res.currentRound;
+                }
                 allowChoice = true;
                 resetEnemyChoices();
                 resetSelfChoices();

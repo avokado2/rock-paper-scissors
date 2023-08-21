@@ -87,3 +87,15 @@ color: white;
 .links a{
 margin-left: 4px;
 }
+.social-link{
+ color: #FFC312;
+}
+.social-link:hover{
+ color: red;
+}
+.social-link:active{
+ color: white;
+}
+.social-link:visited{
+ color: yellow;
+}
