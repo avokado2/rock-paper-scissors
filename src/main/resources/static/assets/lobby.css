@@ -204,6 +204,43 @@ body, html {
     transform: rotate(-720deg);
   }
 }
+.game-body-running-current-round{
+  position: absolute;
+  font-weight: bold;
+  color: white;
+  text-shadow: #FC0 1px 0 10px;
+  top: 186px;
+  animation-name: round-animation;
+  animation-duration: 3s;
+  opacity: 0;
+}
+@keyframes round-animation {
+  0% {
+    transform: scale(0.1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+.chat-messages-private{
+ background-color: 	#1B4035;
+}
+.chat-message-private{
+ padding-left: 1rem;
+ color: green;
+}
+
+
+
+
+
+
 
 /*.admin-lobby{
  display: flex;

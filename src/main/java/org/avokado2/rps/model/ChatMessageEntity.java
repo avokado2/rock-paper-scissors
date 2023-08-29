@@ -17,8 +17,6 @@ public class ChatMessageEntity {
 
     private String message;
 
-    private Long replayMessageId;
-
     @Column(name = "timestamp", insertable = false, updatable = false)
     private Date timestamp;
 
@@ -27,4 +25,8 @@ public class ChatMessageEntity {
     @ManyToOne(targetEntity = PlayerEntity.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id")
     private PlayerEntity player;
+
+    @ManyToOne(targetEntity = PlayerEntity.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id")
+    private PlayerEntity recipient;
 }

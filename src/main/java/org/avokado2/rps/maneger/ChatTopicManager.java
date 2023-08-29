@@ -13,6 +13,11 @@ public class ChatTopicManager {
     private final SimpMessagingTemplate messagingTemplate;
     @EventListener
     public void handleNewChatMessageEvent(ChatMessage event) {
-        messagingTemplate.convertAndSend("/topic/chat-messages/" + event.getGameId(), event);
+        if (event.isPrivateMessage()){
+            messagingTemplate.convertAndSendToUser(event.getNickname(), "/queue/chat-messages" , event);
+            messagingTemplate.convertAndSendToUser(event.getRecipient(), "/queue/chat-messages" , event);
+        } else {
+            messagingTemplate.convertAndSend("/topic/chat-messages/" + event.getGameId(), event);
+        }
     }
 }

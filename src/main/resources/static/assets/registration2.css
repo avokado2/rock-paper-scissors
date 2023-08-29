@@ -1,0 +1,28 @@
+.registration{
+ display: flex;
+ flex-direction: row;
+}
+.registration-left{
+ flex: 1;
+}
+.registration-right{
+ flex: 1;
+}
+.registration-form{
+ padding-top: 1.3rem;
+}
+.register-text{
+ padding-bottom: 1.3rem;
+}
+.error-message{
+ text-align: center
+}
+.button-submit-con{
+ display: flex;
+ justify-content: center;
+}
+.sing-in{
+ text-align: center;
+ padding: 1.3rem;
+}
+

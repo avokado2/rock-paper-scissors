@@ -11,4 +11,10 @@ public class ChatMessage {
     private String text;
 
     private long gameId;
+
+    private long id;
+
+    private boolean privateMessage;
+
+    private String recipient;
 }

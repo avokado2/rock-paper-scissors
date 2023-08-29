@@ -1,6 +1,7 @@
 var selfChoice = null;
 var allowChoice = true;
 var currentRound = 0;
+var toNickname = null;
 function onChatMessageClick() {
   var el = document.getElementById('chat-message-input');
   if (!el.value) {
@@ -12,7 +13,7 @@ function onChatMessageClick() {
         'Accept': 'application/json, text/plain, */*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({gameId: 0, message: el.value})
+      body: JSON.stringify({gameId: 0, message: el.value, "toNickname": toNickname})
     }).then(res => res.json())
       .then(res => {
         console.log(res);
@@ -24,17 +25,64 @@ function onChatMessageClick() {
       });
   return false;
 }
+/*<div class="dropdown" style="display: inline">
+                            <span class="dropdown-toggle chat-message-nickname" id="dropdownMenuSpan" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            33333333333:
+                            </span>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuSpan">
+                                <a class="dropdown-item" href="#">Option 1</a>
+                                <a class="dropdown-item" href="#">Option 2</a>
+                                <a class="dropdown-item" href="#">Option 3</a>
+                            </div>
+                        </div>*/
+function escapeHtml(html){
+  var text = document.createTextNode(html);
+  var p = document.createElement('p');
+  p.appendChild(text);
+  return p.innerHTML;
+}
 function addChatMessage(msg) {
+  var clsName = 'chat-message';
   var elMessages = document.getElementById('chat-messages');
   var chatMessage = document.createElement('div');
-  chatMessage.className='chat-message';
-  var chatMessageNickname = document.createElement('span');
-  chatMessageNickname.className='chat-message-nickname';
-  chatMessageNickname.innerText= msg.nickname + ': ';
-  chatMessage.appendChild(chatMessageNickname);
+  if (msg.privateMessage) {
+    clsName = clsName + ' chat-messages-private';
+  }
+  /*if (msg.currentUserSender) {
+    clsName = clsName + ' chat-message-current-user-sender';
+  }*/
+  chatMessage.className = clsName;
+  var escapeNickname = escapeHtml(msg.nickname);
+
+  chatMessage.innerHTML = `<div class="dropdown" style="display: inline">
+                               <span class="dropdown-toggle chat-message-nickname" id="dropdownMenuSpan${msg.id}"
+                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                ${escapeNickname}:
+                               </span>
+                               <div class="dropdown-menu" aria-labelledby="dropdownMenuSpan${msg.id}">
+                                   <a class="dropdown-item" href="#" id="menu-private-message-${msg.id}">Private message</a>
+                               </div>
+                           </div>`;
+
   var txt = document.createTextNode(msg.text);
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
+  var menuPrivateMessage = document.getElementById('menu-private-message-' + msg.id);
+  menuPrivateMessage.onclick = function() {
+    onPrivateMessage(msg.nickname);
+  };
+}
+function onPrivateMessage(nickname) {
+ var privateNickname = document.getElementById('nickname-span-private');
+ privateNickname.innerText = nickname;
+ var messagePrivate = document.getElementById('message-private');
+ messagePrivate.style.display='';
+ toNickname = nickname;
+}
+function offPrivateMessage() {
+ var messagePrivate = document.getElementById('message-private');
+  messagePrivate.style.display='none';
+  toNickname = null;
 }
 function addChatMessageError(msgError) {
   var elMessages = document.getElementById('chat-messages');
@@ -44,17 +92,30 @@ function addChatMessageError(msgError) {
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
 }
-function onNewRound(roundNumber, isLastRound) {
+
+function onNewRound(roundNumber, isLastRound, roundsCount) {
+    var elGameRunning = document.getElementById('game-body-running');
+    var elCurrentRound = document.getElementById('current-round');
     var audioRound = null;
     if (roundNumber > 0 && isLastRound != true) {
         audioRound = new Audio('/assets/music/round_' + roundNumber + '.mp3');
         audioRound.play();
+        elCurrentRound.innerText = 'Round ' + roundNumber + ' of ' + roundsCount;
     } else if (isLastRound == true) {
         audioRound = new Audio('/assets/music/round_last.mp3');
         audioRound.play();
+        elCurrentRound.innerText = 'Last round'
     } else {
         return;
     }
+    elCurrentRound.style.display='';
+    var left = elGameRunning.clientWidth - elCurrentRound.clientWidth;
+    if (left < 0) {
+        left = 0;
+    } else {
+        left = Math.round(left/2);
+    }
+    elCurrentRound.style.left = left + 'px';
 }
 function onPlayerChoice(choice) {
   if(!allowChoice) {
@@ -166,6 +227,7 @@ fetch('/game/get-status', {
          var elEnemyNickname = document.getElementById('enemy-nickname');
          var elCompleted = document.getElementById('player-completed');
          var elSendChoice = document.getElementById('send-choice-btn');
+         var elCurrentRound = document.getElementById('current-round');
          if (res.type == 'init'){
             elWaitingText.style.display='none';
             elStartGameBtn.style.display='';
@@ -183,7 +245,7 @@ fetch('/game/get-status', {
             elGameInit.style.display='none';
             if (!res.selfChoice) {
                 if (currentRound < res.currentRound) {
-                    onNewRound(res.currentRound, res.currentRound == res.roundCounts);
+                    onNewRound(res.currentRound, res.currentRound == res.roundCounts, res.roundsCount);
                     currentRound = res.currentRound;
                 }
                 allowChoice = true;
@@ -214,6 +276,7 @@ fetch('/game/get-status', {
             }
             if (!allowChoice) {
                 elSendChoice.style.display='none';
+                elCurrentRound.style.display='none';
             }
             elSelfScore.innerText = res.selfScore;
             elEnemyScore.innerText = res.enemyScore;
@@ -283,6 +346,10 @@ stompClient.onConnect = (frame) => {
             console.log(gameStatusUpdate);
             updateGameStatus();
         });
+    stompClient.subscribe('/user/queue/chat-messages', (chatMessage) => {
+                chatMessage = JSON.parse(chatMessage.body);
+                addChatMessage(chatMessage);
+            });
 };
 
 stompClient.onWebSocketError = (error) => {

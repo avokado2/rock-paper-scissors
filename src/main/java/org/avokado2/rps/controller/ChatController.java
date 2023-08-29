@@ -21,7 +21,7 @@ public class ChatController {
     @ResponseBody
     @PostMapping("/add-message")
     public EmptyResponse addMessage(@RequestBody ChatAddMessageRequest request) {
-        chatMessageManager.addMessage(request.getGameId(), request.getMessage());
+        chatMessageManager.addMessage(request.getGameId(), request.getMessage(), request.getToNickname());
         //playerManager.createPlayer();
         return new EmptyResponse();
     }

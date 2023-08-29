@@ -38,7 +38,7 @@ public class ChatMessageManager {
     private final Pattern longWorld = Pattern.compile("[^ ]{20,}");
 
     @Transactional
-    public void addMessage(long gameId, String message){
+    public void addMessage(long gameId, String message, String toNickname){
         long minMessageIntervalMs = settingManager.getMinMessageIntervalMs();
         Long ts = chatIntervalManager.getLastMessageTimestamp(playerManager.getCurrentPlayerId());
         if (ts != null && System.currentTimeMillis() - ts < minMessageIntervalMs) {
@@ -54,6 +54,13 @@ public class ChatMessageManager {
             throw new ManagerException("A message cannot be longer than 20 characters");
         }
         ChatMessageEntity msg = new ChatMessageEntity();
+        if (toNickname != null) {
+            List<PlayerEntity> toNicknameL = playerRepositry.findByLogin(toNickname);
+            if (toNicknameL.isEmpty()) {
+                throw new ManagerException("No player with that nickname was found");
+            }
+            msg.setRecipient(toNicknameL.get(0));
+        }
         msg.setGameId(gameId);
         msg.setMessage(message);
         PlayerEntity playerE = playerRepositry.getReferenceById(playerManager.getCurrentPlayerId());
@@ -64,18 +71,27 @@ public class ChatMessageManager {
         chatMessageEvent.setText(msg.getMessage());
         chatMessageEvent.setNickname(playerE.getLogin());
         chatMessageEvent.setGameId(msg.getGameId());
+        chatMessageEvent.setId(msg.getId());
+        chatMessageEvent.setPrivateMessage(msg.getRecipient() != null);
+        if (msg.getRecipient() != null) {
+            chatMessageEvent.setRecipient(msg.getRecipient().getLogin());
+        }
         publisher.publishEvent(chatMessageEvent);
         chatIntervalManager.messageAdded(playerManager.getCurrentPlayerId());
     }
     public List<ChatMessage> getMessages(long gameId){
-        Page<ChatMessageEntity> chatMessageEntityPage = chatMessageRepositry.findByGameId(gameId,
-                PageRequest.of(0, 10, Sort.by(Sort.Order.desc("timestamp"))));
+//        Page<ChatMessageEntity> chatMessageEntityPage = chatMessageRepositry.findByGameId(gameId,
+//                PageRequest.of(0, 10, Sort.by(Sort.Order.desc("timestamp"))));
+        List<ChatMessageEntity> chatMessageEntities = chatMessageRepositry.getPlayerMessages(playerManager.getCurrentPlayerId(),
+                gameId, 10);
         List<ChatMessage> messageEvents = new ArrayList<>();
-        for (ChatMessageEntity chatMessage: chatMessageEntityPage.getContent()) {
+        for (ChatMessageEntity chatMessage: chatMessageEntities) {
             ChatMessage chatMessageEvent = new ChatMessage();
             chatMessageEvent.setGameId(chatMessage.getGameId());
             chatMessageEvent.setText(chatMessage.getMessage());
             chatMessageEvent.setNickname(chatMessage.getPlayer().getLogin());
+            chatMessageEvent.setId(chatMessage.getId());
+            chatMessageEvent.setPrivateMessage(chatMessage.getRecipient() != null);
             messageEvents.add(chatMessageEvent);
         }
         return messageEvents;

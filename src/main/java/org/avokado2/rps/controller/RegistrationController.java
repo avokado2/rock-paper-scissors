@@ -20,58 +20,59 @@ public class RegistrationController {
     private PlayerUserDetailsManager playerUserDetailsManager;
 
     private final PlayerManager playerManager;
-    @RequestMapping(value = "/registration", method = RequestMethod.GET)
+    @RequestMapping(value = "/registration2", method = RequestMethod.GET)
     public ModelAndView openRegister() {
-        return new ModelAndView("registration");
+        return new ModelAndView("registration2");
     }
-    @RequestMapping(value = "/registration", method = RequestMethod.POST)
+    @RequestMapping(value = "/registration2", method = RequestMethod.POST)
     public ModelAndView register(@RequestParam(value = "login") String login,
                                  @RequestParam(value = "password")String password,
                                  @RequestParam(value = "confirmPassword") String confirmPassword) {
-        log.info("Player registration. Login: {}. Password: {}. Confirm password: {}", login, password, confirmPassword);
+        log.info("Player registration2. Login: {}. Password: {}. Confirm password: {}", login, password, confirmPassword);
         Map model = new HashMap<>();
         if (password.isEmpty()){
             model.put("errorMessage", "password is not set");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (confirmPassword.isEmpty()){
             model.put("errorMessage", "confirm password is not set");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (!password.equals(confirmPassword)){
             model.put("errorMessage", "passwords don't match");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (login.isEmpty()){
             model.put("errorMessage", "login is not set");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (login.length() < 3 ){
             model.put("errorMessage", "login is too short");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (login.length() > 50 ){
             model.put("errorMessage", "login is too long");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (password.length() > 50 ){
             model.put("errorMessage", "password is too long");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         if (password.length() < 6 ){
             model.put("errorMessage", "password is too short");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
 
         try {
             if (!playerManager.registerPlayer(login, password)){
                 model.put("errorMessage", "the login is already taken");
-                return new ModelAndView("registration", model);
+                return new ModelAndView("registration2", model);
             }
         } catch (Exception e) {
             model.put("errorMessage", "error, please repeat");
-            return new ModelAndView("registration", model);
+            return new ModelAndView("registration2", model);
         }
         return new ModelAndView("redirect:/login");
     }
+
 }
