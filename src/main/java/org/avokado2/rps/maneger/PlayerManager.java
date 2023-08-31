@@ -19,7 +19,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Service
 public class PlayerManager {
+
     private final PlayerRepositry playerRepositry;
+
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -49,5 +51,10 @@ public class PlayerManager {
         }
         PlayerUser playerUser = (PlayerUser) details;
         return playerUser.getId();
+    }
+
+    public PlayerEntity getCurrentPlayer() {
+        PlayerEntity currentPlayer = playerRepositry.findById(getCurrentPlayerId());
+        return currentPlayer;
     }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/assets/lobby.css">
 </head>
 <body onload="loadChatMessages(); updateGameStatus()">
+    <span th:text="${currentNickname}" style="display:none" id="current-nickname"></span>
     <div class="game-container" data-bs-theme="dark">
         <!--div class="admin">
             <div class="admin-lobby" id="admin">

@@ -41,36 +41,43 @@ function escapeHtml(html){
   p.appendChild(text);
   return p.innerHTML;
 }
+function getCurrentNickname(){
+  var elCurrentNickname = document.getElementById('current-nickname');
+  return elCurrentNickname.innerText;
+}
 function addChatMessage(msg) {
   var clsName = 'chat-message';
   var elMessages = document.getElementById('chat-messages');
   var chatMessage = document.createElement('div');
+  var currentSender = getCurrentNickname() == msg.nickname;
   if (msg.privateMessage) {
     clsName = clsName + ' chat-messages-private';
   }
-  /*if (msg.currentUserSender) {
+  if (currentSender) {
     clsName = clsName + ' chat-message-current-user-sender';
-  }*/
+  }
   chatMessage.className = clsName;
   var escapeNickname = escapeHtml(msg.nickname);
-
-  chatMessage.innerHTML = `<div class="dropdown" style="display: inline">
-                               <span class="dropdown-toggle chat-message-nickname" id="dropdownMenuSpan${msg.id}"
-                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                ${escapeNickname}:
-                               </span>
-                               <div class="dropdown-menu" aria-labelledby="dropdownMenuSpan${msg.id}">
-                                   <a class="dropdown-item" href="#" id="menu-private-message-${msg.id}">Private message</a>
-                               </div>
-                           </div>`;
-
+  if (!currentSender) {
+    chatMessage.innerHTML = `<div class="dropdown" style="display: inline">
+                                   <span class="dropdown-toggle chat-message-nickname" id="dropdownMenuSpan${msg.id}"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    ${escapeNickname}:
+                                   </span>
+                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuSpan${msg.id}">
+                                       <a class="dropdown-item" href="#" id="menu-private-message-${msg.id}">Private message</a>
+                                   </div>
+                               </div>`;
+  }
   var txt = document.createTextNode(msg.text);
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
-  var menuPrivateMessage = document.getElementById('menu-private-message-' + msg.id);
-  menuPrivateMessage.onclick = function() {
-    onPrivateMessage(msg.nickname);
-  };
+  if (!currentSender) {
+    var menuPrivateMessage = document.getElementById('menu-private-message-' + msg.id);
+    menuPrivateMessage.onclick = function() {
+      onPrivateMessage(msg.nickname);
+    };
+  }
 }
 function onPrivateMessage(nickname) {
  var privateNickname = document.getElementById('nickname-span-private');

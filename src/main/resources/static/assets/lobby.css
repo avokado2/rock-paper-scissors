@@ -235,6 +235,9 @@ body, html {
  padding-left: 1rem;
  color: green;
 }
+.chat-message-current-user-sender{
+ text-align: right;
+}
 
 
 
