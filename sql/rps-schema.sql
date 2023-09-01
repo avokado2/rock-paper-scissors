@@ -28,12 +28,14 @@ CREATE TABLE `chat_messages` (
   `timestamp` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   `player_id` int NOT NULL,
   `message` varchar(120) NOT NULL,
-  `replay_message_id` bigint DEFAULT NULL,
+  `recipient_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_chat_messages_1_idx` (`player_id`),
   KEY `chat_messages_i1` (`game_id`,`timestamp`) /*!80000 INVISIBLE */,
-  CONSTRAINT `fk_chat_messages_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=152 DEFAULT CHARSET=utf8mb3;
+  KEY `fk_chat_messages_2_idx` (`recipient_id`),
+  CONSTRAINT `fk_chat_messages_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_chat_messages_2` FOREIGN KEY (`recipient_id`) REFERENCES `player` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=200 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +62,7 @@ CREATE TABLE `game` (
   KEY `game_i2` (`player2_id`,`completed`),
   CONSTRAINT `fk_game_1` FOREIGN KEY (`player1_id`) REFERENCES `player` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_game_2` FOREIGN KEY (`player2_id`) REFERENCES `player` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,7 +81,7 @@ CREATE TABLE `game_request` (
   UNIQUE KEY `game_request_u1` (`player_id`),
   KEY `fk_game_request_1_idx` (`player_id`),
   CONSTRAINT `fk_game_request_1` FOREIGN KEY (`player_id`) REFERENCES `player` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=148 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,7 +103,7 @@ CREATE TABLE `game_round` (
   PRIMARY KEY (`id`),
   KEY `fk_game_round_1_idx` (`game_id`),
   CONSTRAINT `fk_game_round_1` FOREIGN KEY (`game_id`) REFERENCES `game` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=153 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -117,9 +119,10 @@ CREATE TABLE `player` (
   `password_hash` varchar(255) NOT NULL,
   `rating` int NOT NULL,
   `blocked` tinyint NOT NULL DEFAULT '0',
+  `admin` tinyint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `login_ui` (`login`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -146,4 +149,4 @@ CREATE TABLE `setting` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-17 20:37:26
+-- Dump completed on 2023-09-01 19:25:07
