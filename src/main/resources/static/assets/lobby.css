@@ -238,6 +238,9 @@ body, html {
 .chat-message-current-user-sender{
  text-align: right;
 }
+.chat-message-recipient{
+ color: green;
+}
 
 
 

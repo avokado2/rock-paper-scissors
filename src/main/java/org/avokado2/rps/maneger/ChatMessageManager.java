@@ -2,6 +2,7 @@ package org.avokado2.rps.maneger;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.minidev.json.JSONUtil;
 import org.avokado2.rps.dao.ChatMessageRepositry;
 import org.avokado2.rps.dao.PlayerRepositry;
 import org.avokado2.rps.exception.ManagerException;
@@ -92,6 +93,9 @@ public class ChatMessageManager {
             chatMessageEvent.setNickname(chatMessage.getPlayer().getLogin());
             chatMessageEvent.setId(chatMessage.getId());
             chatMessageEvent.setPrivateMessage(chatMessage.getRecipient() != null);
+            if (chatMessage.getRecipient() != null) {
+                chatMessageEvent.setRecipient(chatMessage.getRecipient().getLogin());
+            }
             messageEvents.add(chatMessageEvent);
         }
         return messageEvents;

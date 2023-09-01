@@ -9,4 +9,5 @@ import java.util.List;
 public interface PlayerRepositry extends JpaRepository<PlayerEntity, Integer> {
     PlayerEntity findById(long id);
     List<PlayerEntity> findByLogin(String login);
+
 }

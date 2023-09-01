@@ -2,9 +2,13 @@ package org.avokado2.rps.maneger;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.avokado2.rps.dao.ChatMessageRepositry;
 import org.avokado2.rps.dao.PlayerRepositry;
+import org.avokado2.rps.exception.ManagerException;
 import org.avokado2.rps.model.PlayerEntity;
 import org.avokado2.rps.model.PlayerUser;
+import org.avokado2.rps.protocol.BlockPlayerEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +27,10 @@ public class PlayerManager {
     private final PlayerRepositry playerRepositry;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final ChatMessageRepositry chatMessageRepositry;
+
+    private final ApplicationEventPublisher publisher;
 
     @Transactional
     public boolean registerPlayer(String login, String password) {
@@ -56,5 +64,26 @@ public class PlayerManager {
     public PlayerEntity getCurrentPlayer() {
         PlayerEntity currentPlayer = playerRepositry.findById(getCurrentPlayerId());
         return currentPlayer;
+    }
+
+    @Transactional
+    public void blockPlayer(String nickname) {
+        if (!getCurrentPlayer().isAdmin()) {
+            throw new ManagerException("You're not an admin and you're about to be banned");
+        }
+        if (getCurrentPlayer().isBlocked()) {
+            throw new ManagerException("You're already locked out");
+        }
+        List<PlayerEntity> block = playerRepositry.findByLogin(nickname);
+        if (block.isEmpty()) {
+            throw new ManagerException("player not found");
+        }
+        PlayerEntity blockPlayer = block.get(0);
+        blockPlayer.setBlocked(true);
+        chatMessageRepositry.deleteMessage(blockPlayer.getId());
+        BlockPlayerEvent blockPlayerEvent = new BlockPlayerEvent();
+        blockPlayerEvent.setNickname(blockPlayer.getLogin());
+
+        publisher.publishEvent(blockPlayerEvent);
     }
 }

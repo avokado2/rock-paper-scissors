@@ -10,6 +10,7 @@
 </head>
 <body onload="loadChatMessages(); updateGameStatus()">
     <span th:text="${currentNickname}" style="display:none" id="current-nickname"></span>
+    <span th:text="${isAdmin}" style="display:none" id="is-admin"></span>
     <div class="game-container" data-bs-theme="dark">
         <!--div class="admin">
             <div class="admin-lobby" id="admin">

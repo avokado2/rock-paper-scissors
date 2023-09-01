@@ -20,9 +20,10 @@ public class LobbyController {
     private final PlayerManager playerManager;
 
     @RequestMapping(value = "/lobby", method = RequestMethod.GET)
-    public ModelAndView openRegister() {
+    public ModelAndView lobbyPage() {
         Map<String,Object> model = new HashMap<>();
         model.put("currentNickname", playerManager.getCurrentPlayer().getLogin());
+        model.put("isAdmin", playerManager.getCurrentPlayer().isAdmin());
         return new ModelAndView("lobby", model);
     }
 }

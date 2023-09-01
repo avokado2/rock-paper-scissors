@@ -45,7 +45,12 @@ function getCurrentNickname(){
   var elCurrentNickname = document.getElementById('current-nickname');
   return elCurrentNickname.innerText;
 }
+function isAdmin(){
+  var elISAdmin = document.getElementById('is-admin');
+  return elISAdmin.innerText === 'true';
+}
 function addChatMessage(msg) {
+  console.log('recipient: ' + msg.recipient);
   var clsName = 'chat-message';
   var elMessages = document.getElementById('chat-messages');
   var chatMessage = document.createElement('div');
@@ -56,28 +61,72 @@ function addChatMessage(msg) {
   if (currentSender) {
     clsName = clsName + ' chat-message-current-user-sender';
   }
+  chatMessage.setAttribute("data-sender", msg.nickname);
   chatMessage.className = clsName;
   var escapeNickname = escapeHtml(msg.nickname);
-  if (!currentSender) {
+  var spanClass = "chat-message-nickname";
+  if (currentSender && msg.recipient != null) {
+    spanClass = "chat-message-recipient";
+    escapeNickname = escapeHtml(msg.recipient);
+  }
+  var blockPlayerHtml = '';
+  if (isAdmin()) {
+    blockPlayerHtml = `<a class="dropdown-item" href="#" id="menu-blocked-player-${msg.id}">Blocked player</a>`;
+
+  }
+  if (!currentSender || (currentSender && msg.recipient != null)) {
     chatMessage.innerHTML = `<div class="dropdown" style="display: inline">
-                                   <span class="dropdown-toggle chat-message-nickname" id="dropdownMenuSpan${msg.id}"
+                                   <span class="dropdown-toggle ${spanClass}" id="dropdownMenuSpan${msg.id}"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     ${escapeNickname}:
                                    </span>
                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuSpan${msg.id}">
                                        <a class="dropdown-item" href="#" id="menu-private-message-${msg.id}">Private message</a>
+                                       ${blockPlayerHtml}
                                    </div>
                                </div>`;
   }
   var txt = document.createTextNode(msg.text);
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
-  if (!currentSender) {
+  if (!currentSender || (currentSender && msg.recipient != null)) {
     var menuPrivateMessage = document.getElementById('menu-private-message-' + msg.id);
     menuPrivateMessage.onclick = function() {
-      onPrivateMessage(msg.nickname);
+      onPrivateMessage((!currentSender) ? msg.nickname : msg.recipient);
     };
+    if (isAdmin()) {
+        var menuBlockedPlayer = document.getElementById('menu-blocked-player-' + msg.id);
+        menuBlockedPlayer.onclick = function() {
+          onBlockPlayer((!currentSender) ? msg.nickname : msg.recipient);
+        };
+    }
   }
+}
+function onBlockPlayer(nickname) {
+ fetch('/admin/block-player', {
+       method: 'POST',
+       headers: {
+         'Accept': 'application/json, text/plain, */*',
+         'Content-Type': 'application/json'
+       },
+       body: JSON.stringify({"nickname": nickname})
+     }).then(res => res.json())
+       .then(res => {
+         console.log(res);
+         if (res.status == 'ok')  {
+         } else {
+           addChatMessageError(res.errorMessage);
+         }
+       });
+}
+function chatDeleteMessage(nickname) {
+ var elChatMessages = document.getElementById("chat-messages");
+ var chatMessageItems = elChatMessages.querySelectorAll(".chat-message");
+ chatMessageItems.forEach((chatMessage) => {
+    if (chatMessage.getAttribute("data-sender") == nickname) {
+        chatMessage.remove();
+    }
+ });
 }
 function onPrivateMessage(nickname) {
  var privateNickname = document.getElementById('nickname-span-private');
@@ -356,6 +405,11 @@ stompClient.onConnect = (frame) => {
     stompClient.subscribe('/user/queue/chat-messages', (chatMessage) => {
                 chatMessage = JSON.parse(chatMessage.body);
                 addChatMessage(chatMessage);
+            });
+    stompClient.subscribe('/topic/block-player-event', (blockPlayer) => {
+                console.log(blockPlayer);
+                blockPlayer = JSON.parse(blockPlayer.body);
+                chatDeleteMessage(blockPlayer.nickname);
             });
 };
 

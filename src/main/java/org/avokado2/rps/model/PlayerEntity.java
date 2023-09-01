@@ -21,4 +21,6 @@ public class PlayerEntity {
 
     private boolean blocked;
 
+    private boolean admin;
+
 }
