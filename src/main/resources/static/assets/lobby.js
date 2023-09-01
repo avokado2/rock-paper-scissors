@@ -148,7 +148,14 @@ function addChatMessageError(msgError) {
   chatMessage.appendChild(txt);
   elMessages.insertBefore(chatMessage, elMessages.firstChild);
 }
-
+function addChatMessageForChatDeleteMessage(nickname, admin) {
+  var elMessages = document.getElementById('chat-messages');
+  var chatMessage = document.createElement('div');
+  chatMessage.className='chat-message-error';
+  var txt = document.createTextNode('--- player ' + nickname + ' has been blocked by admin ' + admin + ' ---');
+  chatMessage.appendChild(txt);
+  elMessages.insertBefore(chatMessage, elMessages.firstChild);
+}
 function onNewRound(roundNumber, isLastRound, roundsCount) {
     var elGameRunning = document.getElementById('game-body-running');
     var elCurrentRound = document.getElementById('current-round');
@@ -410,6 +417,7 @@ stompClient.onConnect = (frame) => {
                 console.log(blockPlayer);
                 blockPlayer = JSON.parse(blockPlayer.body);
                 chatDeleteMessage(blockPlayer.nickname);
+                addChatMessageForChatDeleteMessage(blockPlayer.nickname, blockPlayer.admin)
             });
 };
 

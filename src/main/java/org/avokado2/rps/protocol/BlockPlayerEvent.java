@@ -9,4 +9,5 @@ public class BlockPlayerEvent {
 
     private String nickname;
 
+    private String admin;
 }

@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.avokado2.rps.dao.ChatMessageRepositry;
 import org.avokado2.rps.dao.PlayerRepositry;
 import org.avokado2.rps.exception.ManagerException;
+import org.avokado2.rps.model.ChatMessageEntity;
 import org.avokado2.rps.model.PlayerEntity;
 import org.avokado2.rps.model.PlayerUser;
 import org.avokado2.rps.protocol.BlockPlayerEvent;
+import org.avokado2.rps.protocol.ChatMessage;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -83,6 +85,9 @@ public class PlayerManager {
         chatMessageRepositry.deleteMessage(blockPlayer.getId());
         BlockPlayerEvent blockPlayerEvent = new BlockPlayerEvent();
         blockPlayerEvent.setNickname(blockPlayer.getLogin());
+        if (getCurrentPlayer().isAdmin()) {
+            blockPlayerEvent.setAdmin(getCurrentPlayer().getLogin());
+        }
 
         publisher.publishEvent(blockPlayerEvent);
     }
